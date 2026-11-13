@@ -1,0 +1,30 @@
+﻿name: build-kernel
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Dependencias
+        run: sudo apt-get update && sudo apt-get install -y bc bison flex libssl-dev libncurses-dev lzop python3 git
+      - name: Clonar kernel y toolchain
+        run: |
+          git clone --depth 1 -b lineage-18.1 https://github.com/retiredtab/android_kernel_samsung_msm8916 kernel
+          git clone --depth 1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8 toolchain
+      - name: Parche nombre de panel BOE (SM-P355M)
+        run: |
+          F=kernel/drivers/video/msm/mdss/samsung/S6D7AA0_LSL080AL03_BOE/ss_dsi_panel_S6D7AA0_LSL080AL03_BOE.c
+          sed -i 's/ss_dsi_panel_S6D7AA0_LSL080AL03_BOE_WXGA/ss_dsi_panel_LSL080AL03_BOE_WXGA/' "$F"
+          grep -n 'panel_string\[\]' "$F"
+      - name: Compilar
+        run: |
+          cd kernel
+          export ARCH=arm
+          export CROSS_COMPILE=$GITHUB_WORKSPACE/toolchain/bin/arm-eabi-
+          mkdir output
+          make O=output VARIANT_DEFCONFIG=msm8916_sec_gt58ltebmc_eur_defconfig msm8916_sec_defconfig SELINUX_DEFCONFIG=selinux_defconfig
+          make O=output -j$(nproc) zImage
+          ls -l output/arch/arm/boot/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zImage-p355m
+          path: kernel/output/arch/arm/boot/zImage

@@ -6,14 +6,13 @@ jobs:
     steps:
       - name: Dependencias
         run: |
-          sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y bc bison flex libssl-dev libncurses-dev lzop python3 git libc6:i386 libstdc++6:i386 zlib1g:i386
+          sudo apt-get install -y bc bison flex libssl-dev libncurses-dev lzop python3 git
       - name: Clonar kernel y toolchain
         run: |
           git clone --depth 1 -b lineage-18.1 https://github.com/retiredtab/android_kernel_samsung_msm8916 kernel
-          git clone --depth 1 https://github.com/SaberMod/android_prebuilts_gcc_linux-x86_arm_sabermod-arm-eabi-4.8 toolchain
-          $GITHUB_WORKSPACE/toolchain/bin/arm-eabi-gcc --version
+          git clone --depth 1 -b lineage-19.1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 toolchain
+          $GITHUB_WORKSPACE/toolchain/bin/arm-linux-androideabi-gcc --version
       - name: Parche nombre de panel BOE (SM-P355M)
         run: |
           F=kernel/drivers/video/msm/mdss/samsung/S6D7AA0_LSL080AL03_BOE/ss_dsi_panel_S6D7AA0_LSL080AL03_BOE.c
@@ -23,7 +22,7 @@ jobs:
         run: |
           cd kernel
           export ARCH=arm
-          export CROSS_COMPILE=$GITHUB_WORKSPACE/toolchain/bin/arm-eabi-
+          export CROSS_COMPILE=$GITHUB_WORKSPACE/toolchain/bin/arm-linux-androideabi-
           mkdir output
           make O=output HOSTCFLAGS="-fcommon" VARIANT_DEFCONFIG=msm8916_sec_gt58ltebmc_eur_defconfig msm8916_sec_defconfig SELINUX_DEFCONFIG=selinux_defconfig
           make O=output HOSTCFLAGS="-fcommon" -j$(nproc) zImage

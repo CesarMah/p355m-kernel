@@ -44,7 +44,7 @@ jobs:
           export ARCH=arm
           export CROSS_COMPILE=$GITHUB_WORKSPACE/toolchain/bin/arm-eabi-
           mkdir output
-          make O=output HOSTCFLAGS="-fcommon" VARIANT_DEFCONFIG=msm8916_sec_gt58ltebmc_eur_defconfig msm8916_sec_defconfig SELINUX_DEFCONFIG=selinux_defconfig SELINUX_LOG_DEFCONFIG=selinux_log_defconfig
+          make O=output HOSTCFLAGS="-fcommon" VARIANT_DEFCONFIG=msm8916_sec_gt58ltebmc_eur_defconfig msm8916_sec_defconfig SELINUX_DEFCONFIG=selinux_defconfig
           make O=output HOSTCFLAGS="-fcommon" -j$(nproc) zImage
           ls -l output/arch/arm/boot/
       - uses: actions/upload-artifact@v4

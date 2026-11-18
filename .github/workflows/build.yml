@@ -39,14 +39,8 @@ jobs:
           vreg_path = "kernel/drivers/net/wireless/wcnss/wcnss_vreg.c"
           with open(vreg_path, "r") as f:
               vreg = f.read()
-          old_v2 = """static struct vregs_info pronto_vregs_pronto_v2[] = {
-\t{"qcom,pronto-vddmx",  VREG_NULL_CONFIG,
-\t\tRPM_REGULATOR_CORNER_SUPER_TURBO,  0,
-\t\tRPM_REGULATOR_CORNER_SUPER_TURBO, 0,    NULL},"""
-          new_v2 = """static struct vregs_info pronto_vregs_pronto_v2[] = {
-\t{"qcom,pronto-vddmx",  VREG_NULL_CONFIG,
-\t\t1287500,  0,
-\t\t1287500, 0,    NULL},"""
+          old_v2 = 'static struct vregs_info pronto_vregs_pronto_v2[] = {\n\t{"qcom,pronto-vddmx",  VREG_NULL_CONFIG,\n\t\tRPM_REGULATOR_CORNER_SUPER_TURBO,  0,\n\t\tRPM_REGULATOR_CORNER_SUPER_TURBO, 0,    NULL},'
+          new_v2 = 'static struct vregs_info pronto_vregs_pronto_v2[] = {\n\t{"qcom,pronto-vddmx",  VREG_NULL_CONFIG,\n\t\t1287500,  0,\n\t\t1287500, 0,    NULL},'
           assert old_v2 in vreg
           vreg = vreg.replace(old_v2, new_v2, 1)
           with open(vreg_path, "w") as f:

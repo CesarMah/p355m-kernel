@@ -45,10 +45,26 @@ jobs:
           vreg = vreg.replace(old_v2, new_v2, 1)
           with open(vreg_path, "w") as f:
               f.write(vreg)
+
+          defcfg_path = "kernel/arch/arm/configs/msm8916_sec_gt58ltebmc_eur_defconfig"
+          with open(defcfg_path, "a") as f:
+              f.write("\nCONFIG_INPUT_WACOM=y\nCONFIG_EPEN_WACOM_G5SP=y\n")
+
+          wac_path = "kernel/drivers/input/touchscreen/wacom/wacom_i2c.c"
+          with open(wac_path, "r") as f:
+              wac = f.read()
+          old_wac = "#else\n\tret = wacom_firmware_update(wac_i2c);\n#endif"
+          new_wac = "#else\n\tret = 0;\n#endif"
+          assert old_wac in wac
+          wac = wac.replace(old_wac, new_wac, 1)
+          with open(wac_path, "w") as f:
+              f.write(wac)
           EOF
           grep -n -C 2 'piggydata' kernel/arch/arm/boot/compressed/vmlinux.lds.in
           grep -nE 'panel_string|support_cabc|support_mdnie_lite|samsung_bl_ic_pwm_en' kernel/drivers/video/msm/mdss/samsung/S6D7AA0_LSL080AL03_BOE/ss_dsi_panel_S6D7AA0_LSL080AL03_BOE.c
           grep -n -A 5 'pronto_vregs_pronto_v2' kernel/drivers/net/wireless/wcnss/wcnss_vreg.c
+          grep -nE 'CONFIG_INPUT_WACOM|CONFIG_EPEN_WACOM_G5SP' kernel/arch/arm/configs/msm8916_sec_gt58ltebmc_eur_defconfig
+          grep -n -C 2 'WACOM_DISTINGUISH_DIGITIZER' kernel/drivers/input/touchscreen/wacom/wacom_i2c.c
       - name: Compilar
         run: |
           cd kernel

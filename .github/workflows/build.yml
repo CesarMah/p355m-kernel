@@ -1,4 +1,4 @@
-﻿name: build-kernel
+name: build-kernel
 on: workflow_dispatch
 jobs:
   build:
@@ -35,9 +35,26 @@ jobs:
           pan = pan.replace("vdd->panel_func.samsung_bl_ic_pwm_en(0);", "if (vdd->panel_func.samsung_bl_ic_pwm_en) vdd->panel_func.samsung_bl_ic_pwm_en(0);")
           with open(pan_path, "w") as f:
               f.write(pan)
+
+          vreg_path = "kernel/drivers/net/wireless/wcnss/wcnss_vreg.c"
+          with open(vreg_path, "r") as f:
+              vreg = f.read()
+          old_v2 = """static struct vregs_info pronto_vregs_pronto_v2[] = {
+\t{"qcom,pronto-vddmx",  VREG_NULL_CONFIG,
+\t\tRPM_REGULATOR_CORNER_SUPER_TURBO,  0,
+\t\tRPM_REGULATOR_CORNER_SUPER_TURBO, 0,    NULL},"""
+          new_v2 = """static struct vregs_info pronto_vregs_pronto_v2[] = {
+\t{"qcom,pronto-vddmx",  VREG_NULL_CONFIG,
+\t\t1287500,  0,
+\t\t1287500, 0,    NULL},"""
+          assert old_v2 in vreg
+          vreg = vreg.replace(old_v2, new_v2, 1)
+          with open(vreg_path, "w") as f:
+              f.write(vreg)
           EOF
           grep -n -C 2 'piggydata' kernel/arch/arm/boot/compressed/vmlinux.lds.in
           grep -nE 'panel_string|support_cabc|support_mdnie_lite|samsung_bl_ic_pwm_en' kernel/drivers/video/msm/mdss/samsung/S6D7AA0_LSL080AL03_BOE/ss_dsi_panel_S6D7AA0_LSL080AL03_BOE.c
+          grep -n -A 5 'pronto_vregs_pronto_v2' kernel/drivers/net/wireless/wcnss/wcnss_vreg.c
       - name: Compilar
         run: |
           cd kernel
